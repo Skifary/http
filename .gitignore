@@ -35,7 +35,8 @@
 bin
 lib
 include/curl
-build/msvc/.vc
+build/msvc/.vs
+build/msvc/TestResults
 
 *.tlog
 *.idb

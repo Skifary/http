@@ -30,3 +30,14 @@
 *.exe
 *.out
 *.app
+
+# Custom 
+bin
+lib
+include/curl
+build/msvc/.vc
+
+*.tlog
+*.idb
+*.lastbuildstate
+

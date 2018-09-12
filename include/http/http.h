@@ -1,6 +1,5 @@
 #pragma once
 
-// new header
 
 #include <memory>
 #include <functional>
@@ -10,12 +9,15 @@
 
 #include <fstream>
 #include <unordered_map>
+#include <sstream>
+
+#include <algorithm>
+
 
 namespace http {
 
 
 	// http status code
-
 #define HTTP_OK 200
 
 	
@@ -37,24 +39,119 @@ namespace http {
 		type value_;\
 	};
 
-
-	// define wrapper class
-
+	// declare wrapper class
 	ClassWrapper(FilePath, std::string)
 	ClassWrapper(URL, std::string)
 
-	// define
+	// declare
 	class Session;
+
+	struct Field {
+
+		template <typename T>
+		Field(std::string key, T value)
+			:key_(HTTP_MOVE(key)) {
+			value_ = HTTP_MOVE(std::to_string(value));
+		};
+
+		// Field template specialization for std::string and const char*
+		template <>
+		Field(std::string key, std::string value)
+			:key_(HTTP_MOVE(key)), value_(HTTP_MOVE(value)) {};
+		template <>
+		Field(std::string key, const char* value)
+			:key_(HTTP_MOVE(key)), value_(HTTP_MOVE(std::string(value))) {};
+
+	public:
+		std::string key_;
+		std::string value_;
+	};
 
 	class Headers
 	{
 	public:
 		Headers() = default;
 
-		Headers(std::string&& header_string);
+		Headers(std::string& header_string);
+
+		Headers(const std::initializer_list<Field>& headers);
+
+		// field
+
+		template <typename T>
+		T GetField(std::string field) {
+			
+			// avoid inserting a null value
+			T t{};
+			auto itr = _storage_headers.find(field);
+			if (itr == _storage_headers.end())
+			{
+				return t;
+			}
+
+			std::istringstream stream(itr->second);
+			stream >> t;
+			return HTTP_MOVE(t);
+		};
+
+		// GetField template specialization for std::string
+		template <>
+		std::string GetField(std::string field) {
+
+			// avoid inserting a null value
+			auto itr = _storage_headers.find(field);
+			if (itr == _storage_headers.end())
+			{
+				return "";
+			}
+
+			return _storage_headers[field];
+		};
+
+		template <>
+		bool GetField(std::string field) {
+
+			// avoid inserting a null value
+			auto itr = _storage_headers.find(field);
+			if (itr == _storage_headers.end())
+			{
+				return false;
+			}
+
+			// compatible both "0&&1" and "true&&false"
+			if (_storage_headers[field] == "true")
+			{
+				return true;
+			}
+
+			bool b;
+			std::istringstream stream(itr->second);
+			stream >> b;
+			return HTTP_MOVE(b);
+		};
+
+		template <typename T>
+		void SetField(std::string field, T value) {
+			_storage_headers[field] = HTTP_MOVE(std::to_string(value));
+		};
+
+		// SetField template specialization for std::string and const char*
+		template <>
+		void SetField<std::string>(std::string field, std::string value) {
+			_storage_headers[field] = HTTP_MOVE(value);
+		};
+		template <>
+		void SetField<const char *>(std::string field, const char *value) {
+			_storage_headers[field] = HTTP_MOVE(std::string(value));
+		};
 
 	private:
 
+		void __parse_http_header(std::string& header_string);
+
+	private:
+
+		std::unordered_map<std::string, std::string> _storage_headers;
 	};
 
 	// response
@@ -62,13 +159,13 @@ namespace http {
 	{
 	public:
 		Response() = default;
-		Response(int&& code, std::string&& response_string, Headers&& headers, std::string&& error);
+		Response(int&& code, std::string&& body, Headers&& headers, std::string&& error);
 
 	public:
 
 		int code_;
 
-		std::string response_string_;
+		std::string body_;
 		Headers headers_;
 
 		std::string error_;
@@ -128,31 +225,31 @@ namespace http {
 	//
 	// ----------------------------------------------------------------------------------
 
-	struct Parameter {
+	//struct Parameter {
 
-		template <typename Key, typename Value>
-		Parameter(Key&& key, Value&& value)
-			:key_(HTTP_FWD(key)), value_(HTTP_FWD(value)) {};
+	//	template <typename Key, typename Value>
+	//	Parameter(Key&& key, Value&& value)
+	//		:key_(HTTP_FWD(key)), value_(HTTP_FWD(value)) {};
 
-		template <typename T>
-		inline static std::string ToString(T&& t)
-		{
-			return std::to_string(t);
-		};
+	//	template <typename T>
+	//	inline static std::string ToString(T&& t)
+	//	{
+	//		return std::to_string(t);
+	//	};
 
-	public:
-		std::string key_;
-		std::string value_;
-	};
+	//public:
+	//	std::string key_;
+	//	std::string value_;
+	//};
 
 	class Parameters
 	{
 	public:
 
 		Parameters() = default;
-		Parameters(const std::initializer_list<Parameter>& parameters);
+		Parameters(const std::initializer_list<Field>& parameters);
 
-		void AddParameter(const Parameter& parameter);
+		void AddParameter(const Field& parameter);
 
 	public:
 		std::string format_value_;
@@ -200,7 +297,7 @@ namespace http {
 		URL _url;
 
 		Parameters _parameters;
-		Headers _headers;
+	//	Headers _headers;
 
 		std::unique_ptr<CURLHandle, std::function<void(CURLHandle *)>> _curl_handle_ptr;
 		std::shared_ptr<struct __write_data_t> _response_data_ptr;

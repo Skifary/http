@@ -2,7 +2,6 @@
 #include <http/http.h>
 
 
-
 namespace http {
 
 	namespace priv {
@@ -73,7 +72,7 @@ namespace http {
 	//
 	// ----------------------------------------------------------------------------------
 
-	Parameters::Parameters(const std::initializer_list<Parameter>& parameters)
+	Parameters::Parameters(const std::initializer_list<Field>& parameters)
 	{
 		for (const auto& param : parameters)
 		{
@@ -81,7 +80,7 @@ namespace http {
 		}
 	}
 
-	void Parameters::AddParameter(const Parameter& parameter)
+	void Parameters::AddParameter(const Field& parameter)
 	{
 		if (!format_value_.empty())
 		{
@@ -141,7 +140,19 @@ namespace http {
 	// private
 	void Session::__set_url(URL& url) { _url = url; }
 	void Session::__set_parameters(Parameters& parameters) { _parameters = parameters; }
-	void Session::__set_headers(Headers& headers) { _headers = headers; }
+
+	void Session::__set_headers(Headers& headers) 
+	{ 
+		auto curl = _curl_handle_ptr->curl_;
+
+		if (curl)
+		{
+
+
+
+		}
+
+	}
 
 	Response Session::__request(CURL *curl)
 	{
@@ -224,9 +235,43 @@ namespace http {
 	//
 	// ----------------------------------------------------------------------------------
 
-	Headers::Headers(std::string&& header_string)
+	Headers::Headers(std::string& header_string)
 	{
+		__parse_http_header(header_string);
+	}
 
+	Headers::Headers(const std::initializer_list<Field>& headers)
+	{
+		for (const auto& header : headers)
+		{
+			_storage_headers[header.key_] = header.value_;
+		}
+	}
+
+	void Headers::__parse_http_header(std::string& header_string)
+	{
+		std::istringstream stream(header_string);
+		{
+			std::string line;
+			while (std::getline(stream, line, '\n'))
+			{
+				if (line.length() > 0)
+				{
+					auto found = line.find(":");
+					if (found != std::string::npos)
+					{
+
+						auto value = line.substr(found + 1);
+						// erase space
+						value.erase(0, value.find_first_not_of("\t "));
+						value.resize(std::min(value.size(), value.find_last_not_of("\t\n\r ") + 1));
+
+						_storage_headers[line.substr(0, found)] = value;
+
+					}
+				}
+			}
+		}
 	}
 
 	// ----------------------------------------------------------------------------------
@@ -235,7 +280,16 @@ namespace http {
 	//
 	// ----------------------------------------------------------------------------------
 
-	Response::Response(int&& code, std::string&& response_string, Headers&& headers, std::string&& error)
-		: code_(code), response_string_(response_string), headers_(headers), error_(error) {}
+	Response::Response(int&& code, std::string&& body, Headers&& headers, std::string&& error)
+		: code_(code), body_(body), headers_(headers), error_(error) {}
+
+
+
+	// ----------------------------------------------------------------------------------
+	//
+	//    Field 
+	//
+	// ----------------------------------------------------------------------------------
+
 
 }

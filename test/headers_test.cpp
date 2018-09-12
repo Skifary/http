@@ -19,6 +19,7 @@ TEST(HeadersTests, SetterGetter)
 	EXPECT_EQ(std::string("const_char_ptr_value"), h.GetField<std::string>("const_char_ptr_value"));
 	EXPECT_EQ(std::string("str_value"), h.GetField<std::string>("str_value"));
 	EXPECT_EQ(true, h.GetField<bool>("bool_value"));
+
 }
 
 
@@ -46,6 +47,7 @@ TEST(HeadersTests, ResponseBodyParse)
 	EXPECT_EQ(true, h.GetField<bool>("Access-Control-Allow-Credentials"));
 
 }
+
 
 TEST(HeadersTests, InitializerList)
 {

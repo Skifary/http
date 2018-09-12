@@ -20,7 +20,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\test\get_test.cpp" />
+    <ClCompile Include="..\..\test\headers_test.cpp" />
     <ClCompile Include="..\..\test\main.cpp" />
+    <ClCompile Include="..\..\test\parameter_test.cpp" />
     <ClCompile Include="..\..\test\util_test.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

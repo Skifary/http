@@ -15,5 +15,11 @@
     <ClCompile Include="..\..\test\get_test.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\test\headers_test.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\parameter_test.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

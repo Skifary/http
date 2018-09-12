@@ -225,23 +225,6 @@ namespace http {
 	//
 	// ----------------------------------------------------------------------------------
 
-	//struct Parameter {
-
-	//	template <typename Key, typename Value>
-	//	Parameter(Key&& key, Value&& value)
-	//		:key_(HTTP_FWD(key)), value_(HTTP_FWD(value)) {};
-
-	//	template <typename T>
-	//	inline static std::string ToString(T&& t)
-	//	{
-	//		return std::to_string(t);
-	//	};
-
-	//public:
-	//	std::string key_;
-	//	std::string value_;
-	//};
-
 	class Parameters
 	{
 	public:
@@ -297,7 +280,6 @@ namespace http {
 		URL _url;
 
 		Parameters _parameters;
-	//	Headers _headers;
 
 		std::unique_ptr<CURLHandle, std::function<void(CURLHandle *)>> _curl_handle_ptr;
 		std::shared_ptr<struct __write_data_t> _response_data_ptr;

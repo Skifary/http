@@ -14,6 +14,7 @@
 #include <algorithm>
 
 
+
 namespace http {
 
 
@@ -145,6 +146,8 @@ namespace http {
 			_storage_headers[field] = HTTP_MOVE(std::string(value));
 		};
 
+		curl_slist* Chunk();
+
 	private:
 
 		void __parse_http_header(std::string& header_string);
@@ -152,6 +155,7 @@ namespace http {
 	private:
 
 		std::unordered_map<std::string, std::string> _storage_headers;
+
 	};
 
 	// response
@@ -216,6 +220,8 @@ namespace http {
 	{
 	public:
 		CURL *curl_;
+
+		curl_slist *chunk_;
 
 	};
 

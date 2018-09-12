@@ -147,9 +147,10 @@ namespace http {
 
 		if (curl)
 		{
-
-
-
+			auto chunk = headers.Chunk();
+			curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
+			curl_slist_free_all(_curl_handle_ptr->chunk_);
+			_curl_handle_ptr->chunk_ = chunk;
 		}
 
 	}
@@ -194,6 +195,7 @@ namespace http {
 	{
 		auto handle = new CURLHandle();
 		handle->curl_ = curl_easy_init();
+		handle->chunk_ = nullptr;
 		return handle;
 	}
 
@@ -201,10 +203,10 @@ namespace http {
 	void Session::__curl_handle_free(CURLHandle* handle)
 	{
 		curl_easy_cleanup(handle->curl_);
+		curl_slist_free_all(handle->chunk_);
 	}
 
 	// write function call back
-
 	size_t Session::__write_function(void* ptr, size_t size, size_t nmemb, __write_data_t *data)
 	{
 		size_t append_size = size * nmemb;
@@ -248,6 +250,25 @@ namespace http {
 		}
 	}
 
+	curl_slist* Headers::Chunk()
+	{
+		struct curl_slist* chunk = nullptr;
+		for (auto itr = _storage_headers.cbegin(); itr != _storage_headers.cend(); ++itr) 
+		{
+			auto header_string = std::string{ itr->first };
+			if (itr->second.empty()) 
+			{
+				header_string += ";";
+			}
+			else 
+			{
+				header_string += ": " + itr->second;
+			}
+			chunk = curl_slist_append(chunk, header_string.data());
+		}
+		return chunk;
+	}
+
 	void Headers::__parse_http_header(std::string& header_string)
 	{
 		std::istringstream stream(header_string);
@@ -273,6 +294,7 @@ namespace http {
 			}
 		}
 	}
+
 
 	// ----------------------------------------------------------------------------------
 	//

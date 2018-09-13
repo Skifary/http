@@ -42,9 +42,11 @@ namespace http {
 	ClassWrapper(URL, std::string)
 	ClassWrapper(Progress, std::function<void(double)>)
 
-
+	
 	// declare
 	class Session;
+
+	using byte_t = unsigned char*;
 
 	struct Field {
 
@@ -243,6 +245,41 @@ namespace http {
 	public:
 		std::string format_value_;
 	};
+
+	// ----------------------------------------------------------------------------------
+	//
+	//    Multipart
+	//
+	// ----------------------------------------------------------------------------------
+
+	class Part
+	{
+	public:
+		Part();
+		~Part();
+
+	public:
+
+		std::string type_;
+
+
+	private:
+
+	};
+
+
+
+	class Multipart
+	{
+	public:
+		Multipart();
+		~Multipart();
+
+	private:
+
+	};
+
+
 
 	// ----------------------------------------------------------------------------------
 	//

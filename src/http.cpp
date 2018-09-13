@@ -381,6 +381,27 @@ namespace http {
 		: code_(code), body_(body), headers_(headers), error_(error) {}
 
 
+	// ----------------------------------------------------------------------------------
+	//
+	//    Multipart
+	//
+	// ----------------------------------------------------------------------------------
 
+
+	Part::Part()
+	{
+	}
+
+	Part::~Part()
+	{
+	}
+
+	Multipart::Multipart()
+	{
+	}
+
+	Multipart::~Multipart()
+	{
+	}
 
 }

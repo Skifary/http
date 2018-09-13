@@ -1,20 +1,15 @@
 #pragma once
 
-
 #include <memory>
 #include <functional>
 #include <initializer_list>
 #include <string>
 #include <curl/curl.h>
-
 #include <fstream>
 #include <unordered_map>
 #include <sstream>
-
 #include <algorithm>
-
 #include <iostream>
-
 
 namespace http {
 
@@ -170,12 +165,9 @@ namespace http {
 		Response(int&& code, std::string&& body, Headers&& headers, std::string&& error);
 
 	public:
-
 		int code_;
-
 		std::string body_;
 		Headers headers_;
-
 		std::string error_;
 
 	};
@@ -198,7 +190,6 @@ namespace http {
 
 	} // namespace priv
 
-
 	// ----------------------------------------------------------------------------------
 	//
 	//    public api
@@ -213,6 +204,13 @@ namespace http {
 		return session.Get();
 	}
 
+	// Post 
+	template <typename... Ts>
+	Response Post(Ts&&... ts) {
+		Session session;
+		priv::__set_option(session, HTTP_FWD(ts)...);
+		return session.Post();
+	}
 
 	// ----------------------------------------------------------------------------------
 	//
@@ -223,11 +221,8 @@ namespace http {
 	class CURLHandle
 	{
 	public:
-
 		CURL *curl_;
-
 		curl_slist *chunk_;
-
 	};
 
 	// ----------------------------------------------------------------------------------
@@ -249,7 +244,6 @@ namespace http {
 		std::string format_value_;
 	};
 
-
 	// ----------------------------------------------------------------------------------
 	//
 	//    Session
@@ -270,6 +264,7 @@ namespace http {
 
 		// method
 		Response Get();
+		Response Post();
 
 	private:
 

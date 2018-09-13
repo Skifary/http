@@ -65,7 +65,6 @@ namespace http {
 		};
 	};
 
-
 	// ----------------------------------------------------------------------------------
 	//
 	//    Parameter
@@ -98,7 +97,6 @@ namespace http {
 			format_value_ += escaped_key + "=" + escaped_value;
 		}
 	}
-
 
 	// ----------------------------------------------------------------------------------
 	//
@@ -137,7 +135,21 @@ namespace http {
 			curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "GET");
 		}
 
-		return __request(_curl_handle_ptr->curl_);
+		return __request(curl);
+	}
+
+	Response Session::Post()
+	{
+		auto curl = _curl_handle_ptr->curl_;
+		if (curl) {
+			curl_easy_setopt(curl, CURLOPT_NOBODY, 0L);
+			curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "POST");
+
+			auto payload = HTTP_MOVE(_parameters.format_value_);
+			curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload.c_str());
+		}
+
+		return __request(curl);
 	}
 
 	// options
@@ -199,7 +211,7 @@ namespace http {
 
 		res = curl_easy_perform(curl);
 
-		long resp_code;
+		long resp_code = -1;
 		std::string error;
 
 		curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &resp_code);

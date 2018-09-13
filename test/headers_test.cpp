@@ -57,7 +57,7 @@ TEST(HeadersTests, InitializerList)
 	EXPECT_EQ(std::string("skifary"), h.GetField<std::string>("username"));
 	EXPECT_EQ(std::string("123456"), h.GetField<std::string>("password"));
 	EXPECT_EQ(376512563, h.GetField<int>("id"));
-	EXPECT_FLOAT_EQ(123.456, h.GetField<float>("float"));
+	EXPECT_FLOAT_EQ(123.456f, h.GetField<float>("float"));
 	EXPECT_EQ(true, h.GetField<bool>("bool"));
 
 }

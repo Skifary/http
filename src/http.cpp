@@ -114,8 +114,10 @@ namespace http {
 		//_response_data_ptr = std::make_unique<struct __write_data_t>();
 		// unique_ptr can't use an incomplete type
 		// so i change it to shared_ptr
-		_response_data_ptr = std::make_shared<struct __write_data_t>();
-
+		//_response_data_ptr = std::make_shared<struct __write_data_t>();
+		// use make_shared can't add custom deleter
+		// use shared_ptr to pass custom deleter
+		_response_data_ptr = std::shared_ptr<struct __write_data_t>(new __write_data_t, __resp_data_deleter);
 		auto curl = _curl_handle_ptr->curl_;
 
 		if (curl)
@@ -129,13 +131,21 @@ namespace http {
 	// public
 	Response Session::Get()
 	{
+		auto curl = _curl_handle_ptr->curl_;
+		if (curl) {
+			curl_easy_setopt(curl, CURLOPT_NOBODY, 0L);
+			curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "GET");
+		}
+
 		return __request(_curl_handle_ptr->curl_);
 	}
 
 	// options
 	void Session::SetOption(URL& url) { __set_url(url); }
-	void Session::SetOption(Parameters& parameters) { __set_parameters(parameters); };
-	void Session::SetOption(Headers& headers) { __set_headers(headers); };
+	void Session::SetOption(Parameters& parameters) { __set_parameters(parameters); }
+	void Session::SetOption(Headers& headers) { __set_headers(headers); }
+	void Session::SetOption(DownloadFilePath& filepath) { __set_download_filepath(filepath); }
+	void Session::SetOption(Progress& progress) { __set_progress(progress); }
 
 	// private
 	void Session::__set_url(URL& url) { _url = url; }
@@ -152,7 +162,25 @@ namespace http {
 			curl_slist_free_all(_curl_handle_ptr->chunk_);
 			_curl_handle_ptr->chunk_ = chunk;
 		}
+	}
 
+	void Session::__set_download_filepath(DownloadFilePath& filepath)
+	{
+		_response_data_ptr->type_ = stream;
+		_response_data_ptr->OpenStream(filepath.value_);
+	}
+
+	void Session::__set_progress(Progress& progress)
+	{
+		auto curl = _curl_handle_ptr->curl_;
+
+		if (curl)
+		{
+			_progress = progress;
+			curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, &__xfer_info);
+			curl_easy_setopt(curl, CURLOPT_XFERINFODATA, this);
+			curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+		}
 	}
 
 	Response Session::__request(CURL *curl)
@@ -184,7 +212,7 @@ namespace http {
 		return Response(
 			HTTP_MOVE(resp_code), 
 			HTTP_MOVE(_response_data_ptr->TryGetStringData()),
-			HTTP_MOVE(Headers(head_string.TryGetStringData())), 
+			HTTP_MOVE(Headers(head_string.TryGetStringData())),
 			HTTP_MOVE(error)
 		);
 
@@ -204,14 +232,43 @@ namespace http {
 	{
 		curl_easy_cleanup(handle->curl_);
 		curl_slist_free_all(handle->chunk_);
+		delete handle;
 	}
 
-	// write function call back
+	void Session::__resp_data_deleter(__write_data_t *ptr)
+	{
+		ptr->TryCloseStream();
+		delete ptr;
+	}
+
+	// write function callback
 	size_t Session::__write_function(void* ptr, size_t size, size_t nmemb, __write_data_t *data)
 	{
 		size_t append_size = size * nmemb;
 		data->SetData(ptr, append_size);
 		return append_size;
+	}
+
+	// progress callback
+	int Session::__xfer_info(void *data, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow)
+	{
+		auto session = (Session *)data;
+		if (session->_progress.value_)
+		{
+			double progress = 0.0;
+
+			if (dltotal)
+			{
+				progress = (double)dlnow / (double)dltotal;
+			}
+			else if (ultotal)
+			{
+				progress = (double)ulnow / (double)ultotal;
+			}
+
+			session->_progress.value_(progress);
+		}
+		return 0;
 	}
 
 
@@ -236,6 +293,11 @@ namespace http {
 	//    Headers 
 	//
 	// ----------------------------------------------------------------------------------
+
+	Headers::Headers(std::string&& header_string)
+	{
+		__parse_http_header(header_string);
+	}
 
 	Headers::Headers(std::string& header_string)
 	{
@@ -306,12 +368,6 @@ namespace http {
 		: code_(code), body_(body), headers_(headers), error_(error) {}
 
 
-
-	// ----------------------------------------------------------------------------------
-	//
-	//    Field 
-	//
-	// ----------------------------------------------------------------------------------
 
 
 }

@@ -13,6 +13,7 @@
 
 #include <algorithm>
 
+#include <iostream>
 
 
 namespace http {
@@ -41,8 +42,11 @@ namespace http {
 	};
 
 	// declare wrapper class
-	ClassWrapper(FilePath, std::string)
+	ClassWrapper(DownloadFilePath, std::string)
+	ClassWrapper(UploadFilePath, std::string)
 	ClassWrapper(URL, std::string)
+	ClassWrapper(Progress, std::function<void(double)>)
+
 
 	// declare
 	class Session;
@@ -71,10 +75,10 @@ namespace http {
 	class Headers
 	{
 	public:
+
 		Headers() = default;
-
+		Headers(std::string&& header_string);
 		Headers(std::string& header_string);
-
 		Headers(const std::initializer_list<Field>& headers);
 
 		// field
@@ -189,7 +193,7 @@ namespace http {
 		void __set_option(Session& session, T&& t, Ts&&... ts)
 		{
 			__set_option(session, HTTP_FWD(t));
-			__set_option(session, HTTP_FWD(ts...));
+			__set_option(session, HTTP_FWD(ts)...);
 		}
 
 	} // namespace priv
@@ -219,6 +223,7 @@ namespace http {
 	class CURLHandle
 	{
 	public:
+
 		CURL *curl_;
 
 		curl_slist *chunk_;
@@ -260,6 +265,8 @@ namespace http {
 		void SetOption(URL& url);
 		void SetOption(Parameters& parameters);
 		void SetOption(Headers& headers);
+		void SetOption(DownloadFilePath& filepath);
+		void SetOption(Progress& progress);
 
 		// method
 		Response Get();
@@ -270,6 +277,9 @@ namespace http {
 		void __set_url(URL& url);
 		void __set_parameters(Parameters& parameters);
 		void __set_headers(Headers& headers);
+		void __set_download_filepath(DownloadFilePath& filepath);
+		void __set_progress(Progress& progress);
+
 
 		// core request
 		Response __request(CURL *curl);
@@ -278,14 +288,21 @@ namespace http {
 		CURLHandle* __curl_handle_init();
 		static void __curl_handle_free(CURLHandle* handle);
 
-		// curl write call back
+		// resp custom deleter
+		static void __resp_data_deleter(struct __write_data_t *ptr);
+
+		// curl write callback
 		static size_t __write_function(void* ptr, size_t size, size_t nmemb, struct __write_data_t *data);
+		// curl progress callback
+		static int __xfer_info(void *data, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow);
 
 	private:
 
 		URL _url;
 
 		Parameters _parameters;
+
+		Progress _progress;
 
 		std::unique_ptr<CURLHandle, std::function<void(CURLHandle *)>> _curl_handle_ptr;
 		std::shared_ptr<struct __write_data_t> _response_data_ptr;

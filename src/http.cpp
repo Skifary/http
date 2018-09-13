@@ -207,6 +207,7 @@ namespace http {
 		if (res != CURLE_OK)
 		{
 			error = curl_easy_strerror(res);
+			std::cout << "[curl error] : " << std::endl << "[code] " << res << std::endl << "[message] " << error << std::endl;
 		}
 
 		return Response(

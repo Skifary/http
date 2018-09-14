@@ -39,7 +39,6 @@ namespace http {
 
 	// declare wrapper class
 	ClassWrapper(DownloadFilePath, std::string)
-	ClassWrapper(UploadFilePath, std::string)
 	ClassWrapper(URL, std::string)
 	ClassWrapper(Progress, std::function<void(double)>)
 
@@ -215,6 +214,14 @@ namespace http {
 		return session.Post();
 	}
 
+	// Post 
+	template <typename... Ts>
+	Response Head(Ts&&... ts) {
+		Session session;
+		priv::__set_option(session, HTTP_FWD(ts)...);
+		return session.Post();
+	}
+
 	// ----------------------------------------------------------------------------------
 	//
 	//    CURLHandle
@@ -307,6 +314,7 @@ namespace http {
 		// method
 		Response Get();
 		Response Post();
+		Response Head();
 
 	private:
 

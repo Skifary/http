@@ -158,6 +158,16 @@ namespace http {
 		return __request(curl);
 	}
 
+	Response Session::Head()
+	{
+		auto curl = _curl_handle_ptr->curl_;
+		if (curl) {
+			curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, NULL);
+			curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
+		}
+		return __request(curl);
+	}
+
 	// options
 	void Session::SetOption(URL& url) { __set_url(url); }
 	void Session::SetOption(Parameters& parameters) { __set_parameters(parameters); }

@@ -151,7 +151,7 @@ namespace http {
 
 		curl_slist* Chunk();
 
-		void Merge(Headers& other);
+		Headers& Merge(Headers& other);
 
 	private:
 

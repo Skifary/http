@@ -356,6 +356,11 @@ namespace http {
 		}
 	}
 
+	Headers::Headers(std::unordered_map<std::string, std::string>& map)
+	{
+		_storage_headers = map;
+	}
+
 	curl_slist* Headers::Chunk()
 	{
 		struct curl_slist* chunk = nullptr;
@@ -400,7 +405,7 @@ namespace http {
 						auto value = line.substr(found + 1);
 						// erase space
 						value.erase(0, value.find_first_not_of("\t "));
-						value.resize(std::min(value.size(), value.find_last_not_of("\t\n\r ") + 1));
+						value.resize((std::min)(value.size(), value.find_last_not_of("\t\n\r ") + 1));
 
 						_storage_headers[line.substr(0, found)] = value;
 

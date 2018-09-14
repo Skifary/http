@@ -65,6 +65,9 @@ namespace http {
 		template <>
 		Field(std::string key, const char* value)
 			:key_(HTTP_MOVE(key)), value_(HTTP_MOVE(std::string(value))) {};
+		template <>
+		Field(std::string key, char* value)
+			:key_(HTTP_MOVE(key)), value_(HTTP_MOVE(std::string(value))) {};
 
 	public:
 		std::string key_;
@@ -78,6 +81,7 @@ namespace http {
 		Headers() = default;
 		Headers(std::string&& header_string);
 		Headers(std::string& header_string);
+		Headers(std::unordered_map<std::string, std::string>& map);
 		Headers(const std::initializer_list<Field>& headers);
 
 		// field
@@ -148,7 +152,10 @@ namespace http {
 		void SetField<const char *>(std::string field, const char *value) {
 			_storage_headers[field] = HTTP_MOVE(std::string(value));
 		};
-
+		template <>
+		void SetField<char *>(std::string field, char *value) {
+			_storage_headers[field] = HTTP_MOVE(std::string(value));
+		};
 		curl_slist* Chunk();
 
 		Headers& Merge(Headers& other);

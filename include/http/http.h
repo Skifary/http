@@ -151,6 +151,8 @@ namespace http {
 
 		curl_slist* Chunk();
 
+		void Merge(Headers& other);
+
 	private:
 
 		void __parse_http_header(std::string& header_string);

@@ -375,6 +375,14 @@ namespace http {
 		return chunk;
 	}
 
+	void Headers::Merge(Headers& other)
+	{
+		for (const auto& pair : other._storage_headers)
+		{
+			_storage_headers.insert(pair);
+		}
+	}
+
 	void Headers::__parse_http_header(std::string& header_string)
 	{
 		std::istringstream stream(header_string);

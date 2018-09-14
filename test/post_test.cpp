@@ -13,3 +13,17 @@ TEST(PostTests, SamplePostTest)
 	EXPECT_EQ(1, 1);
 
 }
+
+TEST(PostTests, AsyncTest)
+{
+
+	http::PostAsync([](http::Response resp) {
+
+		int i = 1;
+	
+	}, http::URL{ "www.baidu.com" });
+
+
+	EXPECT_EQ(1, 1);
+
+}

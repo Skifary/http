@@ -26,4 +26,14 @@ TEST(GetTests, DownloadTest)
 
 }
 
+TEST(GetTests, AsyncTest)
+{
 
+	http::GetAsync([](http::Response resp) {
+		
+		// response
+
+	}, http::URL{ "www.baidu.com" });
+
+
+}

@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\test\get_test.cpp" />
     <ClCompile Include="..\..\test\headers_test.cpp" />
+    <ClCompile Include="..\..\test\head_test.cpp" />
     <ClCompile Include="..\..\test\main.cpp" />
     <ClCompile Include="..\..\test\multipart_test.cpp" />
     <ClCompile Include="..\..\test\parameter_test.cpp" />

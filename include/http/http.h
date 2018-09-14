@@ -4,13 +4,15 @@
 #include <functional>
 #include <initializer_list>
 #include <string>
-#include <curl/curl.h>
 #include <fstream>
 #include <unordered_map>
 #include <sstream>
 #include <algorithm>
 #include <iostream>
 #include <vector>
+#include <future>
+
+#include <curl/curl.h>
 
 namespace http {
 
@@ -206,6 +208,17 @@ namespace http {
 		return session.Get();
 	}
 
+	// Get Async
+	template <typename... Ts>
+	std::future<void> GetAsync(std::function<void(Response)> complete, Ts... ts) {
+		return std::async(std::launch::async,
+			[complete](Ts... ts) {
+			auto resp = Get(HTTP_MOVE(ts)...);
+			complete(HTTP_MOVE(resp));
+		},
+			HTTP_MOVE(ts)...);
+	}
+
 	// Post 
 	template <typename... Ts>
 	Response Post(Ts&&... ts) {
@@ -214,12 +227,34 @@ namespace http {
 		return session.Post();
 	}
 
-	// Post 
+	// Post Async
+	template <typename... Ts>
+	std::future<void> PostAsync(std::function<void(Response)> complete, Ts... ts) {
+		return std::async(std::launch::async,
+			[complete](Ts... ts) {
+			auto resp = Post(HTTP_MOVE(ts)...);
+			complete(HTTP_MOVE(resp));
+		},
+			HTTP_MOVE(ts)...);
+	}
+
+	// Head 
 	template <typename... Ts>
 	Response Head(Ts&&... ts) {
 		Session session;
 		priv::__set_option(session, HTTP_FWD(ts)...);
 		return session.Post();
+	}
+
+	// Head Async
+	template <typename... Ts>
+	std::future<void> HeadAsync(std::function<void(Response)> complete, Ts... ts) {
+		return std::async(std::launch::async,
+			[complete](Ts... ts) {
+			auto resp = Head(HTTP_MOVE(ts)...);
+			complete(HTTP_MOVE(resp));
+		},
+			HTTP_MOVE(ts)...);
 	}
 
 	// ----------------------------------------------------------------------------------

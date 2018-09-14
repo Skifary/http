@@ -120,7 +120,13 @@ namespace http {
 
 		if (curl)
 		{
-			//curl init 
+			//curl defaults 
+			auto version_info = curl_version_info(CURLVERSION_NOW);
+			auto version = std::string{ "curl/" } + std::string{ version_info->version };
+			curl_easy_setopt(curl, CURLOPT_USERAGENT, version.data());
+			curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+			curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
+			curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 50L);
 
 		}
 

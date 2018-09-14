@@ -10,6 +10,7 @@
 #include <sstream>
 #include <algorithm>
 #include <iostream>
+#include <vector>
 
 namespace http {
 
@@ -46,7 +47,7 @@ namespace http {
 	// declare
 	class Session;
 
-	using byte_t = unsigned char*;
+	using byte_t = unsigned char;
 
 	struct Field {
 
@@ -225,6 +226,7 @@ namespace http {
 	public:
 		CURL *curl_;
 		curl_slist *chunk_;
+		curl_mime *mime_;
 	};
 
 	// ----------------------------------------------------------------------------------
@@ -255,30 +257,32 @@ namespace http {
 	class Part
 	{
 	public:
-		Part();
-		~Part();
+
+		Part() = default;
+
+		Part(std::string type, byte_t* data, std::string name = "") :type_(HTTP_MOVE(type)), is_file_{ false }, data_((char*)data),name_(name) {};
+		Part(std::string filepath, std::string name = "") : is_file_{ true }, data_(filepath), name_(name) {};
 
 	public:
 
 		std::string type_;
-
-
-	private:
-
+		bool is_file_;
+		std::string data_;
+		std::string name_;
 	};
-
-
 
 	class Multipart
 	{
 	public:
-		Multipart();
-		~Multipart();
+
+		Multipart(const std::initializer_list<Part>& parts);
+
+		curl_mime* Add2Curl(CURL *curl);
 
 	private:
+		std::vector<Part> _parts;
 
 	};
-
 
 
 	// ----------------------------------------------------------------------------------
@@ -298,6 +302,7 @@ namespace http {
 		void SetOption(Headers& headers);
 		void SetOption(DownloadFilePath& filepath);
 		void SetOption(Progress& progress);
+		void SetOption(Multipart& multipart);
 
 		// method
 		Response Get();
@@ -311,7 +316,7 @@ namespace http {
 		void __set_headers(Headers& headers);
 		void __set_download_filepath(DownloadFilePath& filepath);
 		void __set_progress(Progress& progress);
-
+		void __set_multipart(Multipart& multipart);
 
 		// core request
 		Response __request(CURL *curl);

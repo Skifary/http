@@ -158,6 +158,7 @@ namespace http {
 	void Session::SetOption(Headers& headers) { __set_headers(headers); }
 	void Session::SetOption(DownloadFilePath& filepath) { __set_download_filepath(filepath); }
 	void Session::SetOption(Progress& progress) { __set_progress(progress); }
+	void Session::SetOption(Multipart& multipart) { __set_multipart(multipart); };
 
 	// private
 	void Session::__set_url(URL& url) { _url = url; }
@@ -192,6 +193,18 @@ namespace http {
 			curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, &__xfer_info);
 			curl_easy_setopt(curl, CURLOPT_XFERINFODATA, this);
 			curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+		}
+	}
+
+	void Session::__set_multipart(Multipart& multipart)
+	{
+		auto curl = _curl_handle_ptr->curl_;
+
+		if (curl)
+		{
+			auto mime = multipart.Add2Curl(curl);
+			curl_mime_free(_curl_handle_ptr->mime_);
+			_curl_handle_ptr->mime_ = mime;
 		}
 	}
 
@@ -237,6 +250,7 @@ namespace http {
 		auto handle = new CURLHandle();
 		handle->curl_ = curl_easy_init();
 		handle->chunk_ = nullptr;
+		handle->mime_ = nullptr;
 		return handle;
 	}
 
@@ -245,6 +259,7 @@ namespace http {
 	{
 		curl_easy_cleanup(handle->curl_);
 		curl_slist_free_all(handle->chunk_);
+		curl_mime_free(handle->mime_);
 		delete handle;
 	}
 
@@ -387,21 +402,49 @@ namespace http {
 	//
 	// ----------------------------------------------------------------------------------
 
-
-	Part::Part()
+	Multipart::Multipart(const std::initializer_list<Part>& parts)
 	{
+		int index = 0;
+		_parts.resize(parts.size());
+		for (const auto& part : parts)
+		{
+			_parts[index++] = part;
+		}
 	}
 
-	Part::~Part()
+	curl_mime* Multipart::Add2Curl(CURL *curl)
 	{
-	}
+		// todo 
+		// subpart support
+		if (curl && _parts.size() > 0)
+		{
+			curl_mime *mime = nullptr;
+			mime = curl_mime_init(curl);
+			curl_mimepart *mimepart;
+			for (const auto& part : _parts)
+			{
+				if (part.is_file_)
+				{
+					mimepart = curl_mime_addpart(mime);
+					curl_mime_filedata(mimepart, part.data_.c_str());
+				}
+				else
+				{
+					mimepart = curl_mime_addpart(mime);
+					curl_mime_data(mimepart, part.data_.c_str(), CURL_ZERO_TERMINATED);
+					curl_mime_type(mimepart, part.type_.c_str());
+				}
 
-	Multipart::Multipart()
-	{
-	}
+				if (!part.name_.empty())
+				{
+					curl_mime_name(mimepart, part.name_.c_str());
+				}
 
-	Multipart::~Multipart()
-	{
+			}
+			curl_easy_setopt(curl, CURLOPT_MIMEPOST, mime);
+			return mime;
+		}
+		return nullptr;
 	}
 
 }

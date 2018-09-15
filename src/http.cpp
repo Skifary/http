@@ -150,9 +150,6 @@ namespace http {
 		if (curl) {
 			curl_easy_setopt(curl, CURLOPT_NOBODY, 0L);
 			curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "POST");
-
-			auto payload = HTTP_MOVE(_parameters.format_value_);
-			curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload.c_str());
 		}
 
 		return __request(curl);

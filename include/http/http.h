@@ -140,22 +140,12 @@ namespace http {
 
 		template <typename T>
 		void SetField(std::string field, T value) {
-			_storage_headers[field] = HTTP_MOVE(std::to_string(value));
+			std::ostringstream stream;
+			stream << value;
+			_storage_headers[field] = HTTP_MOVE(stream.str());
+
 		};
 
-		// SetField template specialization for std::string and const char*
-		template <>
-		void SetField<std::string>(std::string field, std::string value) {
-			_storage_headers[field] = HTTP_MOVE(value);
-		};
-		template <>
-		void SetField<const char *>(std::string field, const char *value) {
-			_storage_headers[field] = HTTP_MOVE(std::string(value));
-		};
-		template <>
-		void SetField<char *>(std::string field, char *value) {
-			_storage_headers[field] = HTTP_MOVE(std::string(value));
-		};
 		curl_slist* Chunk();
 
 		Headers& Merge(Headers& other);

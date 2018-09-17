@@ -85,12 +85,12 @@ More options and methods is on the way.
 
 ### Requirement
 
-####Required
+#### Required
 
 * libcurl 7.56.0 or newer
 * C++ 11 compiler
 
-####Optional
+#### Optional
 
 * Google Test
 
@@ -101,11 +101,15 @@ More options and methods is on the way.
 * In this way, you should build `libcurl` for your own environment. For more please see [curl](https://github.com/curl/curl).
 * Then drag the `http.h` and `http.cpp` into your project and build it.
 
-####Windows
+#### Windows
 
 
 
-####Mac OS
+
+
+#### Mac OS
+
+
 
 
 

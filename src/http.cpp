@@ -171,7 +171,8 @@ namespace http {
 	void Session::SetOption(Headers& headers) { __set_headers(headers); }
 	void Session::SetOption(DownloadFilePath& filepath) { __set_download_filepath(filepath); }
 	void Session::SetOption(Progress& progress) { __set_progress(progress); }
-	void Session::SetOption(Multipart& multipart) { __set_multipart(multipart); };
+	void Session::SetOption(Multipart& multipart) { __set_multipart(multipart); }
+	void Session::SetOption(Payload& payload) { __set_payload(payload); }
 
 	// private
 	void Session::__set_url(URL& url) { _url = url; }
@@ -218,6 +219,16 @@ namespace http {
 			auto mime = multipart.Add2Curl(curl);
 			curl_mime_free(_curl_handle_ptr->mime_);
 			_curl_handle_ptr->mime_ = mime;
+		}
+	}
+
+	void Session::__set_payload(Payload& payload)
+	{
+		auto curl = _curl_handle_ptr->curl_;
+		if (curl)
+		{
+			curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, payload.value_.length());
+			curl_easy_setopt(curl, CURLOPT_COPYPOSTFIELDS, payload.value_.data());
 		}
 	}
 

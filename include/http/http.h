@@ -43,7 +43,7 @@ namespace http {
 	ClassWrapper(DownloadFilePath, std::string)
 	ClassWrapper(URL, std::string)
 	ClassWrapper(Progress, std::function<void(double)>)
-
+	ClassWrapper(Payload, std::string)
 	
 	// declare
 	class Session;
@@ -55,19 +55,10 @@ namespace http {
 		template <typename T>
 		Field(std::string key, T value)
 			:key_(HTTP_MOVE(key)) {
-			value_ = HTTP_MOVE(std::to_string(value));
+			std::ostringstream stream;
+			stream << value;
+			value_ = HTTP_MOVE(stream.str());
 		};
-
-		// Field template specialization for std::string and const char*
-		template <>
-		Field(std::string key, std::string value)
-			:key_(HTTP_MOVE(key)), value_(HTTP_MOVE(value)) {};
-		template <>
-		Field(std::string key, const char* value)
-			:key_(HTTP_MOVE(key)), value_(HTTP_MOVE(std::string(value))) {};
-		template <>
-		Field(std::string key, char* value)
-			:key_(HTTP_MOVE(key)), value_(HTTP_MOVE(std::string(value))) {};
 
 	public:
 		std::string key_;
@@ -344,6 +335,7 @@ namespace http {
 		void SetOption(DownloadFilePath& filepath);
 		void SetOption(Progress& progress);
 		void SetOption(Multipart& multipart);
+		void SetOption(Payload& payload);
 
 		// method
 		Response Get();
@@ -359,6 +351,7 @@ namespace http {
 		void __set_download_filepath(DownloadFilePath& filepath);
 		void __set_progress(Progress& progress);
 		void __set_multipart(Multipart& multipart);
+		void __set_payload(Payload& payload);
 
 		// core request
 		Response __request(CURL *curl);

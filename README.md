@@ -71,7 +71,7 @@ auto resp = http::Post(
 
 Set options of interest into the http method's parameters.
 
-The currently(2018-9-17) options include  `URL`  `Parameters`  `Headers`  `DownloadFilePath `  `Progress`  `Multipart`.
+The currently(2018-9-19) options include  `URL`  `Parameters`  `Headers`  `DownloadFilePath `  `Progress`  `Multipart` `Payload`.
 
 The currently(2018-9-17) methods include  `Get`  `Post`  `Head` and it's `async` version. 
 
@@ -81,7 +81,8 @@ More options and methods is on the way.
 
 * More HTTP method
 * More options
-* HTTPS
+* Cross-platform adaptation
+* Compile script for Windows and Mac OS
 
 ### Requirement
 
@@ -100,18 +101,6 @@ More options and methods is on the way.
 
 * In this way, you should build `libcurl` for your own environment. For more please see [curl](https://github.com/curl/curl).
 * Then drag the `http.h` and `http.cpp` into your project and build it.
-
-#### Windows
-
-
-
-
-
-#### Mac OS
-
-
-
-
 
 ### Special thanks
 

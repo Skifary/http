@@ -81,7 +81,7 @@ More options and methods is on the way.
 
 * More HTTP method
 * More options
-* Cross-platform adaptation
+* Cross-platform support
 * Compile script for Windows and Mac OS
 
 ### Requirement

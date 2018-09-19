@@ -45,8 +45,6 @@ namespace http {
 	ClassWrapper(Progress, std::function<void(double)>)
 	ClassWrapper(Payload, std::string)
 	
-	// declare
-	class Session;
 
 	using byte_t = unsigned char;
 
@@ -57,7 +55,7 @@ namespace http {
 			:key_(HTTP_MOVE(key)) {
 			std::ostringstream stream;
 			stream << value;
-			value_ = HTTP_MOVE(stream.str());
+			value_ = stream.str();
 		};
 
 	public:
@@ -133,7 +131,7 @@ namespace http {
 		void SetField(std::string field, T value) {
 			std::ostringstream stream;
 			stream << value;
-			_storage_headers[field] = HTTP_MOVE(stream.str());
+			_storage_headers[field] = stream.str();
 
 		};
 
@@ -166,86 +164,6 @@ namespace http {
 
 	};
 
-	// private
-	namespace priv {
-
-		template <typename T>
-		void __set_option(Session& session, T&& t)
-		{
-			session.SetOption(HTTP_FWD(t));
-		}
-
-		template <typename T, typename... Ts>
-		void __set_option(Session& session, T&& t, Ts&&... ts)
-		{
-			__set_option(session, HTTP_FWD(t));
-			__set_option(session, HTTP_FWD(ts)...);
-		}
-
-	} // namespace priv
-
-	// ----------------------------------------------------------------------------------
-	//
-	//    public api
-	//
-	// ----------------------------------------------------------------------------------
-
-	// Get 
-	template <typename... Ts>
-	Response Get(Ts&&... ts) {
-		Session session;
-		priv::__set_option(session, HTTP_FWD(ts)...);
-		return session.Get();
-	}
-
-	// Get Async
-	template <typename... Ts>
-	std::future<void> GetAsync(std::function<void(Response)> complete, Ts... ts) {
-		return std::async(std::launch::async,
-			[complete](Ts... ts) {
-			auto resp = Get(HTTP_MOVE(ts)...);
-			complete(HTTP_MOVE(resp));
-		},
-			HTTP_MOVE(ts)...);
-	}
-
-	// Post 
-	template <typename... Ts>
-	Response Post(Ts&&... ts) {
-		Session session;
-		priv::__set_option(session, HTTP_FWD(ts)...);
-		return session.Post();
-	}
-
-	// Post Async
-	template <typename... Ts>
-	std::future<void> PostAsync(std::function<void(Response)> complete, Ts... ts) {
-		return std::async(std::launch::async,
-			[complete](Ts... ts) {
-			auto resp = Post(HTTP_MOVE(ts)...);
-			complete(HTTP_MOVE(resp));
-		},
-			HTTP_MOVE(ts)...);
-	}
-
-	// Head 
-	template <typename... Ts>
-	Response Head(Ts&&... ts) {
-		Session session;
-		priv::__set_option(session, HTTP_FWD(ts)...);
-		return session.Post();
-	}
-
-	// Head Async
-	template <typename... Ts>
-	std::future<void> HeadAsync(std::function<void(Response)> complete, Ts... ts) {
-		return std::async(std::launch::async,
-			[complete](Ts... ts) {
-			auto resp = Head(HTTP_MOVE(ts)...);
-			complete(HTTP_MOVE(resp));
-		},
-			HTTP_MOVE(ts)...);
-	}
 
 	// ----------------------------------------------------------------------------------
 	//
@@ -256,7 +174,7 @@ namespace http {
 	class CURLHandle
 	{
 	public:
-		CURL *curl_;
+		CURL * curl_;
 		curl_slist *chunk_;
 		curl_mime *mime_;
 	};
@@ -292,7 +210,7 @@ namespace http {
 
 		Part() = default;
 
-		Part(std::string type, byte_t* data, std::string name = "") :type_(HTTP_MOVE(type)), is_file_{ false }, data_((char*)data),name_(name) {};
+		Part(std::string type, byte_t* data, std::string name = "") :type_(HTTP_MOVE(type)), is_file_{ false }, data_((char*)data), name_(name) {};
 		Part(std::string filepath, std::string name = "") : is_file_{ true }, data_(filepath), name_(name) {};
 
 	public:
@@ -380,6 +298,88 @@ namespace http {
 		std::shared_ptr<struct __write_data_t> _response_data_ptr;
 	};
 
+	// private
+	namespace priv {
+
+		template <typename T>
+		void __set_option(Session& session, T&& t)
+		{
+			session.SetOption(HTTP_FWD(t));
+		}
+
+		template <typename T, typename... Ts>
+		void __set_option(Session& session, T&& t, Ts&&... ts)
+		{
+			__set_option(session, HTTP_FWD(t));
+			__set_option(session, HTTP_FWD(ts)...);
+		}
+
+	} // namespace priv
+
+	// ----------------------------------------------------------------------------------
+	//
+	//    public api
+	//
+	// ----------------------------------------------------------------------------------
+
+	// Get 
+	template <typename... Ts>
+	Response Get(Ts&&... ts) {
+		Session session;
+		priv::__set_option(session, HTTP_FWD(ts)...);
+		return session.Get();
+	}
+
+	// Get Async
+	template <typename... Ts>
+	std::future<void> GetAsync(std::function<void(Response)> complete, Ts... ts) {
+		return std::async(std::launch::async,
+			[complete](Ts... ts) {
+			auto resp = Get(HTTP_MOVE(ts)...);
+			complete(HTTP_MOVE(resp));
+		},
+			HTTP_MOVE(ts)...);
+	}
+
+	// Post 
+	template <typename... Ts>
+	Response Post(Ts&&... ts) {
+		Session session;
+		priv::__set_option(session, HTTP_FWD(ts)...);
+		return session.Post();
+	}
+
+	// Post Async
+	template <typename... Ts>
+	std::future<void> PostAsync(std::function<void(Response)> complete, Ts... ts) {
+		return std::async(std::launch::async,
+			[complete](Ts... ts) {
+			auto resp = Post(HTTP_MOVE(ts)...);
+			complete(HTTP_MOVE(resp));
+		},
+			HTTP_MOVE(ts)...);
+	}
+
+	// Head 
+	template <typename... Ts>
+	Response Head(Ts&&... ts) {
+		Session session;
+		priv::__set_option(session, HTTP_FWD(ts)...);
+		return session.Post();
+	}
+
+	// Head Async
+	template <typename... Ts>
+	std::future<void> HeadAsync(std::function<void(Response)> complete, Ts... ts) {
+		return std::async(std::launch::async,
+			[complete](Ts... ts) {
+			auto resp = Head(HTTP_MOVE(ts)...);
+			complete(HTTP_MOVE(resp));
+		},
+			HTTP_MOVE(ts)...);
+	}
+
+	
 } // namespace http
 
 

@@ -1,5 +1,11 @@
 #pragma once
 
+/***************************************************************************
+*
+* Copyright (C) 2018, Skifary, <gskifary@outlook.com>.
+*
+***************************************************************************/
+
 #include <memory>
 #include <functional>
 #include <initializer_list>

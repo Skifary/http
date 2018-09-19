@@ -1,6 +1,12 @@
 
-#include <http/http.h>
+/***************************************************************************
+*
+* Copyright (C) 2018, Skifary, <gskifary@outlook.com>.
+*
+***************************************************************************/
 
+
+#include <http/http.h>
 
 namespace http {
 
@@ -287,6 +293,7 @@ namespace http {
 		delete handle;
 	}
 
+	// resp deleter
 	void Session::__resp_data_deleter(__write_data_t *ptr)
 	{
 		ptr->TryCloseStream();

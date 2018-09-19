@@ -32,12 +32,13 @@
 *.app
 
 # Custom 
-bin
-lib
-include/curl
+#bin
+#lib
+#include/curl
 build/msvc/.vs
 build/msvc/TestResults
-
+!lib/libcurl.lib
+!lib/libcurl.dll
 *.tlog
 *.idb
 *.lastbuildstate

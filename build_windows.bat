@@ -1,0 +1,1 @@
+bitsadmin /transfer "JobName" https://github.com/curl/curl/archive/master.zip D:\1.zip

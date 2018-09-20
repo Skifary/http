@@ -1,5 +1,7 @@
 # http
 
+[![Build Status](https://travis-ci.org/Skifary/http.svg?branch=master)](https://travis-ci.org/Skifary/http)
+
 A lightweight http requests library.
 
 ### Example
